@@ -45,10 +45,10 @@ def create_db():
 
     db.close()
 
-    add_sample_doctors()
+    add_sample_doctors_and_archives()
 
 
-def add_sample_doctors():
+def add_sample_doctors_and_archives():
     # Dodaj przykładowych lekarzy
     db = QSqlDatabase.addDatabase("QSQLITE")
     db.setDatabaseName("przychodnia.db")
@@ -82,6 +82,17 @@ def add_sample_doctors():
         ('Grzegorz Małecki', 'Psychiatra'),
         ('Aleksandra Zawisza', 'Psychiatra')
     """)
+    query.exec()
+
+    query.prepare("""
+        INSERT INTO archiwum (specjalizacja, lekarz, data, godzina) VALUES
+        ('Kardiolog', 'Jan Kowalski', '2024-01-10', '10:00'),
+        ('Pediatra', 'Karolina Adamczyk', '2024-01-11', '11:30'),
+        ('Neurolog', 'Michał Kaczmarek', '2023-12-20', '09:45'),
+        ('Dermatolog', 'Anna Dąbrowska', '2023-11-15', '12:00'),
+        ('Psychiatra', 'Zofia Górska', '2023-10-25', '13:15')
+    """)
+
     query.exec()
 
     db.close()

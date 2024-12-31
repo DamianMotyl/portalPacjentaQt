@@ -1,5 +1,9 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
-from PyQt6.QtSql import QSqlDatabase, QSqlQuery
+from PyQt6.QtCore import Qt
+from PyQt6.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
+from PyQt6.QtWidgets import QMessageBox
+import  csv
+
 import create_database
 import os
 
@@ -10,13 +14,20 @@ class MainWindow(QtWidgets.QMainWindow):
         if not os.path.exists("przychodnia.db"):
             create_database.create_db()
 
+        # Ustawienia bazy danych
+        self.db = QSqlDatabase.addDatabase("QSQLITE")
+        self.db.setDatabaseName("przychodnia.db")
+        if not self.db.open():
+            print("Nie udało się połączyć z bazą danych")
+            return
+
         # Central Widget
         self.central_widget = QtWidgets.QWidget(self)
         self.setCentralWidget(self.central_widget)
 
         # Frame 1
         self.frame = QtWidgets.QFrame(self.central_widget)
-        self.frame.setGeometry(QtCore.QRect(-10, -20, 941, 101))
+        self.frame.setGeometry(QtCore.QRect(-10, -20, 970, 101))
         self.frame.setStyleSheet("QFrame{background-color:rgb(250, 247, 241);}")
         self.frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
@@ -39,7 +50,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # GroupBox
         self.groupBox = QtWidgets.QGroupBox("UMÓW WIZYTĘ LUB BADANIE", self.central_widget)
-        self.groupBox.setGeometry(QtCore.QRect(20, 100, 901, 191))
+        self.groupBox.setGeometry(QtCore.QRect(20, 90, 901, 191))
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(True)
@@ -79,14 +90,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.comboBoxGodzina.setFont(font)
 
         # Populate ComboBox with hours and minutes in 20-minute intervals
-        for hour in range(24):
+        for hour in range(8, 20):
             for minute in range(0, 60, 20):
                 time_str = f"{hour:02d}:{minute:02d}"
                 self.comboBoxGodzina.addItem(time_str)
 
         self.dateEdit = QtWidgets.QDateEdit(self.groupBox)
         self.dateEdit.setGeometry(QtCore.QRect(720, 70, 130, 31))
-        self.dateEdit.setFont(font  )
+        self.dateEdit.setFont(font)
         self.dateEdit.setDateTime(QtCore.QDateTime.currentDateTime())
         self.dateEdit.setCalendarPopup(True)
 
@@ -94,10 +105,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pushButtonDodajWizyte = QtWidgets.QPushButton("Dodaj Wizytę", self.groupBox)
         self.pushButtonDodajWizyte.setGeometry(QtCore.QRect(370, 120, 161, 51))
         self.pushButtonDodajWizyte.setFont(font)
+        self.pushButtonDodajWizyte.clicked.connect(self.add_appointment)
 
         # Frame 2 (Scheduled Appointments)
         self.frame_2 = QtWidgets.QFrame(self.central_widget)
-        self.frame_2.setGeometry(QtCore.QRect(20, 320, 901, 241))
+        self.frame_2.setGeometry(QtCore.QRect(20, 300, 901, 291))
         self.frame_2.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
 
@@ -107,16 +119,17 @@ class MainWindow(QtWidgets.QMainWindow):
         font.setBold(True)
         self.label_6.setFont(font)
 
-        self.tableView_2 = QtWidgets.QTableView(self.frame_2)
-        self.tableView_2.setGeometry(QtCore.QRect(10, 40, 881, 131))
+        self.tableViewWizyty = QtWidgets.QTableView(self.frame_2)
+        self.tableViewWizyty.setGeometry(QtCore.QRect(10, 40, 881, 180))
 
         self.pushButtonOdwolajWizyte = QtWidgets.QPushButton("Odwołaj Wizytę", self.frame_2)
-        self.pushButtonOdwolajWizyte.setGeometry(QtCore.QRect(370, 180, 160, 51))
+        self.pushButtonOdwolajWizyte.setGeometry(QtCore.QRect(370, 230, 160, 51))
         self.pushButtonOdwolajWizyte.setFont(font)
+        self.pushButtonOdwolajWizyte.clicked.connect(self.cancel_appointment)
 
         # Frame 3 (Archived Appointments)
         self.frame_3 = QtWidgets.QFrame(self.central_widget)
-        self.frame_3.setGeometry(QtCore.QRect(20, 580, 901, 191))
+        self.frame_3.setGeometry(QtCore.QRect(20, 610, 901, 280))
         self.frame_3.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.frame_3.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
 
@@ -124,8 +137,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.label_7.setGeometry(QtCore.QRect(10, 10, 231, 16))
         self.label_7.setFont(font)
 
-        self.tableView = QtWidgets.QTableView(self.frame_3)
-        self.tableView.setGeometry(QtCore.QRect(10, 40, 881, 131))
+        self.tableViewArchiwum = QtWidgets.QTableView(self.frame_3)
+        self.tableViewArchiwum.setGeometry(QtCore.QRect(10, 40, 881, 150))
+
+        self.pushButtonEksport = QtWidgets.QPushButton("Eksportuj Wizyty", self.frame_3)
+        self.pushButtonEksport.setGeometry(QtCore.QRect(370, 210, 160, 51))
+        self.pushButtonEksport.setFont(font)
+        self.pushButtonEksport.clicked.connect(self.export_appointments)
 
         # Set up menu and status bar
         self.menubar = self.menuBar()
@@ -135,52 +153,235 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setFixedSize(950, 900)
 
         self.load_specializations()
+        self.load_appointments()
+        self.load_archives()
 
         self.show()
 
     def load_specializations(self):
-        db = QSqlDatabase.addDatabase("QSQLITE")
-        db.setDatabaseName("przychodnia.db")
-
-        if not db.open():
-            print("Nie udało się połączyć z bazą danych")
-            return
-
         query = QSqlQuery()
-
-        # Pobranie wszystkich unikalnych specjalizacji z tabeli lekarzy
-        query.exec("SELECT DISTINCT specjalizacja FROM lekarze")
-        while query.next():
-            self.comboBoxSpecjalizacja.addItem(query.value(0))
-
-        # Obsługuje zmianę wybranej specjalizacji, aby wczytać odpowiednich lekarzy
+        if query.exec("SELECT DISTINCT specjalizacja FROM lekarze"):
+            while query.next():
+                self.comboBoxSpecjalizacja.addItem(query.value(0))
         self.comboBoxSpecjalizacja.currentIndexChanged.connect(self.load_doctors)
 
-        db.close()
-
     def load_doctors(self):
-        # Załaduj lekarzy na podstawie wybranej specjalizacji
         selected_specialization = self.comboBoxSpecjalizacja.currentText()
-        db = QSqlDatabase.addDatabase("QSQLITE")
-        db.setDatabaseName("przychodnia.db")
+        query = QSqlQuery()
+        query.prepare("SELECT lekarz FROM lekarze WHERE specjalizacja = :specjalizacja")
+        query.bindValue(":specjalizacja", selected_specialization)
+        if query.exec():
+            self.comboBoxLekarz.clear()
+            while query.next():
+                self.comboBoxLekarz.addItem(query.value(0))
 
-        if not db.open():
-            print("Nie udało się połączyć z bazą danych")
+    def add_appointment(self):
+        specialization = self.comboBoxSpecjalizacja.currentText()
+        doctor = self.comboBoxLekarz.currentText()
+        time = self.comboBoxGodzina.currentText()
+        date = self.dateEdit.date().toString("yyyy-MM-dd")
+
+        if not specialization or not doctor or not time or not date:
+            print("Proszę wypełnić wszystkie pola")
+            return
+
+        day_of_week = self.dateEdit.date().dayOfWeek()
+        print(f"Wybrany dzień tygodnia: {day_of_week}")
+
+        if day_of_week in [6, 7]:  # Sobota lub niedziela
+            msg = QMessageBox(self)
+            msg.setWindowTitle("Ostrzeżenie")
+            msg.setText("Nie można umówić wizyty w weekend (sobota/niedziela) oraz w dni świąteczne.")
+            msg.setIcon(QMessageBox.Icon.Information)
+            msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+            msg.exec()
             return
 
         query = QSqlQuery()
+        query.prepare(
+            "SELECT COUNT(*) FROM wizyty WHERE lekarz = :lekarz AND data = :data AND godzina = :godzina"
+        )
+        query.bindValue(":lekarz", doctor)
+        query.bindValue(":data", date)
+        query.bindValue(":godzina", time)
+        if query.exec() and query.next() and query.value(0) > 0:
+            print("W tym czasie ta wizyta już istnieje.")
+            return
 
-        # Pobranie lekarzy z wybranej specjalizacji
-        query.prepare("SELECT lekarz FROM lekarze WHERE specjalizacja = :specjalizacja")
-        query.bindValue(":specjalizacja", selected_specialization)
-        query.exec()
+        query.prepare(
+            "INSERT INTO wizyty (specjalizacja, lekarz, godzina, data) VALUES (:specjalizacja, :lekarz, :godzina, :data)"
+        )
+        query.bindValue(":specjalizacja", specialization)
+        query.bindValue(":lekarz", doctor)
+        query.bindValue(":godzina", time)
+        query.bindValue(":data", date)
+        if query.exec():
+            print("Wizyta dodana pomyślnie")
+        else:
+            print("Błąd podczas dodawania wizyty")
+        self.load_appointments()
 
-        self.comboBoxLekarz.clear()  # Wyczyszczenie poprzednich danych
+    def cancel_appointment(self):
+        selected_row = self.tableViewWizyty.selectionModel().currentIndex().row()
 
-        while query.next():
-            self.comboBoxLekarz.addItem(query.value(0))
+        if selected_row < 0:
+            msg = QMessageBox(self)
+            msg.setWindowTitle("Błąd")
+            msg.setText("Proszę wybrać wizytę do odwołania.")
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+            msg.exec()
+            return
 
-        db.close()
+        # Pobranie szczegółów wizyty z modelu
+        model = self.tableViewWizyty.model()
+        specialization = model.index(selected_row, 1).data()
+        doctor = model.index(selected_row, 2).data()
+        date = model.index(selected_row, 3).data()
+        time = model.index(selected_row, 4).data()
+
+        # Potwierdzenie usunięcia
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Potwierdzenie")
+        msg_box.setText(
+            f"Czy na pewno chcesz odwołać wizytę?\n\nSpecjalizacja: {specialization}\nLekarz: {doctor}\nData: {date}\nGodzina: {time}")
+        msg_box.setIcon(QMessageBox.Icon.Question)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        result = msg_box.exec()
+
+        if result == QMessageBox.StandardButton.No:
+            return
+
+        # Usunięcie wizyty z bazy danych
+        query = QSqlQuery()
+        query.prepare(
+            "DELETE FROM wizyty WHERE specjalizacja = :specjalizacja AND lekarz = :lekarz AND data = :data AND godzina = :godzina"
+        )
+        query.bindValue(":specjalizacja", specialization)
+        query.bindValue(":lekarz", doctor)
+        query.bindValue(":data", date)
+        query.bindValue(":godzina", time)
+
+        if query.exec():
+            print("Wizyta została odwołana.")
+        else:
+            print("Błąd podczas odwoływania wizyty.")
+
+        # Odświeżenie tabeli z wizytami
+        self.load_appointments()
+
+    def load_appointments(self):
+        model = QSqlTableModel()
+        model.setTable("wizyty")
+        model.setEditStrategy(QSqlTableModel.EditStrategy.OnFieldChange)
+        model.select()
+
+        model.setHeaderData(1, QtCore.Qt.Orientation.Horizontal, "Specjalizacja")
+        model.setHeaderData(2, QtCore.Qt.Orientation.Horizontal, "Lekarz")
+        model.setHeaderData(3, QtCore.Qt.Orientation.Horizontal, "Data")
+        model.setHeaderData(4, QtCore.Qt.Orientation.Horizontal, "Godzina")
+
+        # Ustawienia tabeli
+        self.tableViewWizyty.setModel(model)
+        self.tableViewWizyty.hideColumn(0)
+        header = self.tableViewWizyty.horizontalHeader()
+        header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.tableViewWizyty.setStyleSheet(
+            """
+            QTableView {
+                font-size: 10pt;
+                background-color: #f9f9f9;
+                alternate-background-color: #e6f4f1;
+                gridline-color: #c3c3c3;
+            }
+            QHeaderView::section {
+                background-color: #89aaa5;
+                color: white;
+                font-weight: bold;
+                font-size: 11pt;
+                border: 1px solid #d4d4d4;
+                padding: 4px;
+            }
+            """
+        )
+        self.tableViewWizyty.horizontalHeader().setStretchLastSection(True)  # Rozciąganie ostatniej kolumny
+        self.tableViewWizyty.verticalHeader().setVisible(False)  # Ukrycie opisów wierszy
+        self.tableViewWizyty.setSelectionBehavior(QtWidgets.QTableView.SelectionBehavior.SelectRows)  # Wybór całych wierszy
+        self.tableViewWizyty.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)  # Zablokowanie edycji
+        self.tableViewWizyty.setSortingEnabled(True)  # Sortowanie po kliknięciu w nagłówek kolumny
+
+    def load_archives(self):
+        model = QSqlTableModel()
+        model.setTable("archiwum")
+        model.setEditStrategy(QSqlTableModel.EditStrategy.OnFieldChange)
+        model.select()
+
+        model.setHeaderData(1, QtCore.Qt.Orientation.Horizontal, "Specjalizacja")
+        model.setHeaderData(2, QtCore.Qt.Orientation.Horizontal, "Lekarz")
+        model.setHeaderData(3, QtCore.Qt.Orientation.Horizontal, "Data")
+        model.setHeaderData(4, QtCore.Qt.Orientation.Horizontal, "Godzina")
+
+        # Ustawienia tabeli
+        self.tableViewArchiwum.setModel(model)
+        self.tableViewArchiwum.hideColumn(0)
+        header = self.tableViewArchiwum.horizontalHeader()
+        header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.tableViewArchiwum.setStyleSheet(
+            """
+            QTableView {
+                font-size: 10pt;
+                background-color: #f9f9f9;
+                alternate-background-color: #e6f4f1;
+                gridline-color: #c3c3c3;
+            }
+            QHeaderView::section {
+                background-color: #89aaa5;
+                color: white;
+                font-weight: bold;
+                font-size: 11pt;
+                border: 1px solid #d4d4d4;
+                padding: 4px;
+            }
+            """
+        )
+        self.tableViewArchiwum.horizontalHeader().setStretchLastSection(True)  # Rozciąganie ostatniej kolumny
+        self.tableViewArchiwum.verticalHeader().setVisible(False)  # Ukrycie opisów wierszy
+        self.tableViewArchiwum.setSelectionBehavior(QtWidgets.QTableView.SelectionBehavior.SelectRows)  # Wybór całych wierszy
+        self.tableViewArchiwum.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)  # Zablokowanie edycji
+        self.tableViewArchiwum.setSortingEnabled(True)  # Sortowanie po kliknięciu w nagłówek kolumny
+
+    def export_appointments(self):
+        model = self.tableViewArchiwum.model()
+        if model is None or model.rowCount() == 0:
+            QMessageBox.warning(self, "Błąd", "Brak danych do eksportu.")
+            return
+
+        # options = QtWidgets.QFileDialog.Options()
+        # file_path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Zapisz plik", "", "CSV Files (*.csv)",
+        #                                                      options=options)
+        #
+        # if not file_path:
+        #     return
+        app_directory = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(app_directory, "archiwum_wizyt.csv")
+
+
+
+        try:
+            with open(file_path, mode="w", newline="", encoding="utf-8") as file:
+                writer = csv.writer(file)
+                # Zapis nagłówków
+                headers = [model.headerData(i, Qt.Orientation.Horizontal) for i in range(model.columnCount())]
+                writer.writerow(headers)
+                # Zapis danych
+                for row in range(model.rowCount()):
+                    row_data = [model.index(row, col).data() for col in range(model.columnCount())]
+                    writer.writerow(row_data)
+
+            QMessageBox.information(self, "Sukces", "Wizyty zostały pomyślnie wyeksportowane.")
+        except Exception as e:
+            QMessageBox.critical(self, "Błąd", f"Wystąpił błąd podczas eksportu: {str(e)}")
+
 
 # Run the application
 app = QtWidgets.QApplication([])
