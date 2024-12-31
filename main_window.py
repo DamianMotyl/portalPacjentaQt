@@ -129,7 +129,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Frame 3 (Archived Appointments)
         self.frame_3 = QtWidgets.QFrame(self.central_widget)
-        self.frame_3.setGeometry(QtCore.QRect(20, 610, 901, 280))
+        self.frame_3.setGeometry(QtCore.QRect(20, 610, 901, 350))
         self.frame_3.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.frame_3.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
 
@@ -137,20 +137,43 @@ class MainWindow(QtWidgets.QMainWindow):
         self.label_7.setGeometry(QtCore.QRect(10, 10, 231, 16))
         self.label_7.setFont(font)
 
+        self.label_8 = QtWidgets.QLabel("Filtruj wizyty:", self.frame_3)
+        self.label_8.setGeometry(QtCore.QRect(20, 35, 231, 25))
+        self.label_8.setFont(font)
+
         self.tableViewArchiwum = QtWidgets.QTableView(self.frame_3)
-        self.tableViewArchiwum.setGeometry(QtCore.QRect(10, 40, 881, 150))
+        self.tableViewArchiwum.setGeometry(QtCore.QRect(10, 100, 881, 150))
 
         self.pushButtonEksport = QtWidgets.QPushButton("Eksportuj Wizyty", self.frame_3)
-        self.pushButtonEksport.setGeometry(QtCore.QRect(370, 210, 160, 51))
+        self.pushButtonEksport.setGeometry(QtCore.QRect(370, 265, 160, 51))
         self.pushButtonEksport.setFont(font)
         self.pushButtonEksport.clicked.connect(self.export_appointments)
+
+        self.filterSpecjalizacja = QtWidgets.QComboBox(self.frame_3)
+        self.filterSpecjalizacja.setGeometry(QtCore.QRect(10, 65, 191, 31))
+        self.filterSpecjalizacja.setFont(font)
+        self.filterSpecjalizacja.addItem("Specjalizacja")
+        self.filterSpecjalizacja.currentIndexChanged.connect(self.apply_filter)
+
+        self.filterLekarz = QtWidgets.QComboBox(self.frame_3)
+        self.filterLekarz.setGeometry(QtCore.QRect(250, 65, 191, 31))
+        self.filterLekarz.setFont(font)
+        self.filterLekarz.addItem("Lekarz")
+        self.filterLekarz.currentIndexChanged.connect(self.apply_filter)
+
+        self.filterData = QtWidgets.QComboBox(self.frame_3)
+        self.filterData.setGeometry(QtCore.QRect(480, 65, 191, 31))
+        self.filterData.setFont(font)
+        self.filterData.addItem("Data")
+        self.filterData.currentIndexChanged.connect(self.apply_filter)
+
 
         # Set up menu and status bar
         self.menubar = self.menuBar()
         self.statusbar = self.statusBar()
 
         self.setWindowTitle("E-PACJENT")
-        self.setFixedSize(950, 900)
+        self.setFixedSize(950, 950)
 
         self.load_specializations()
         self.load_appointments()
@@ -321,6 +344,18 @@ class MainWindow(QtWidgets.QMainWindow):
         model.setHeaderData(3, QtCore.Qt.Orientation.Horizontal, "Data")
         model.setHeaderData(4, QtCore.Qt.Orientation.Horizontal, "Godzina")
 
+        query = QSqlQuery("SELECT DISTINCT specjalizacja FROM archiwum")
+        while query.next():
+            self.filterSpecjalizacja.addItem(query.value(0))
+
+        query = QSqlQuery("SELECT DISTINCT lekarz FROM archiwum")
+        while query.next():
+            self.filterLekarz.addItem(query.value(0))
+
+        query = QSqlQuery("SELECT DISTINCT data FROM archiwum")
+        while query.next():
+            self.filterData.addItem(query.value(0))
+
         # Ustawienia tabeli
         self.tableViewArchiwum.setModel(model)
         self.tableViewArchiwum.hideColumn(0)
@@ -381,6 +416,29 @@ class MainWindow(QtWidgets.QMainWindow):
             QMessageBox.information(self, "Sukces", "Wizyty zostały pomyślnie wyeksportowane.")
         except Exception as e:
             QMessageBox.critical(self, "Błąd", f"Wystąpił błąd podczas eksportu: {str(e)}")
+
+    def apply_filter(self):
+        model = self.tableViewArchiwum.model()
+
+        filter_query = []
+
+        # Filtrowanie po specjalizacji
+        if self.filterSpecjalizacja.currentText() != "Specjalizacja":
+            filter_query.append(f"specjalizacja = '{self.filterSpecjalizacja.currentText()}'")
+
+        if self.filterSpecjalizacja.currentText() != "Lekarz":
+            filter_query.append(f"lekarz = '{self.filterLekarz.currentText()}'")
+
+        if self.filterData.currentText() != "Data":
+            filter_query.append(f"data = '{self.filterData.currentText()}'")
+
+        # Jeśli istnieją filtry, ustaw je w zapytaniu
+        if filter_query:
+            model.setFilter(" AND ".join(filter_query))
+        else:
+            model.setFilter("")  # Jeśli brak filtrów, pokaż wszystkie dane
+
+        model.select()  # Zastosuj filtr na model
 
 
 # Run the application
