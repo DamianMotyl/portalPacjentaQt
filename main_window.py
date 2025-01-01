@@ -3,7 +3,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox, QScrollArea
 import  csv
 import create_database
 import os
@@ -25,6 +25,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # Central Widget
         self.central_widget = QtWidgets.QWidget(self)
         self.setCentralWidget(self.central_widget)
+
+        self.scroll_area = QScrollArea(self)
+        self.scroll_area.setWidget(self.central_widget)
+        self.setCentralWidget(self.scroll_area)
 
         # Frame 1
         self.frame = QtWidgets.QFrame(self.central_widget)
