@@ -1,11 +1,9 @@
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
 def create_db():
-    # Dodaj bazę danych
     db = QSqlDatabase.addDatabase("QSQLITE")
     db.setDatabaseName("przychodnia.db")
 
-    # Sprawdź, czy połączenie z bazą danych jest udane
     if not db.open():
         print("Nie udało się połączyć z bazą danych")
         return
@@ -44,12 +42,10 @@ def create_db():
     ''')
 
     db.close()
-
     add_sample_doctors_and_archives()
 
 
 def add_sample_doctors_and_archives():
-    # Dodaj przykładowych lekarzy
     db = QSqlDatabase.addDatabase("QSQLITE")
     db.setDatabaseName("przychodnia.db")
 
@@ -58,8 +54,6 @@ def add_sample_doctors_and_archives():
         return
 
     query = QSqlQuery()
-
-    # Dodanie lekarzy z nowymi specjalizacjami
     query.prepare("""
         INSERT INTO lekarze (lekarz, specjalizacja) VALUES
         ('Jan Kowalski', 'Kardiolog'),
@@ -67,9 +61,9 @@ def add_sample_doctors_and_archives():
         ('Piotr Zieliński', 'Kardiolog'),
         ('Ewa Mazur', 'Kardiolog'),
         ('Marek Wiśniewski', 'Kardiolog'),
-        ('Karolina Adamczyk', 'Pediatra'),
-        ('Tomasz Kowal', 'Pediatra'),
-        ('Agnieszka Szymańska', 'Pediatra'),
+        ('Karolina Adamczyk', 'Gastrolog'),
+        ('Tomasz Kowal', 'Gastrolog'),
+        ('Agnieszka Szymańska', 'Gastrolog'),
         ('Michał Kaczmarek', 'Neurolog'),
         ('Anna Jabłońska', 'Neurolog'),
         ('Jakub Nowicki', 'Chirurg'),
@@ -78,21 +72,32 @@ def add_sample_doctors_and_archives():
         ('Anna Dąbrowska', 'Dermatolog'),
         ('Janusz Piotrowski', 'Dermatolog'),
         ('Katarzyna Nowicka', 'Dermatolog'),
-        ('Zofia Górska', 'Psychiatra'),
-        ('Grzegorz Małecki', 'Psychiatra'),
-        ('Aleksandra Zawisza', 'Psychiatra')
+        ('Zofia Górska', 'Laryngolog'),
+        ('Grzegorz Małecki', 'Laryngolog'),
+        ('Aleksandra Zawisza', 'Laryngolog')
     """)
     query.exec()
 
     query.prepare("""
         INSERT INTO archiwum (specjalizacja, lekarz, data, godzina) VALUES
         ('Kardiolog', 'Jan Kowalski', '2024-01-10', '10:00'),
-        ('Pediatra', 'Karolina Adamczyk', '2024-01-11', '11:30'),
+        ('Gastrolog', 'Karolina Adamczyk', '2024-01-11', '11:30'),
         ('Neurolog', 'Michał Kaczmarek', '2023-12-20', '09:45'),
         ('Dermatolog', 'Anna Dąbrowska', '2023-11-15', '12:00'),
-        ('Psychiatra', 'Zofia Górska', '2023-10-25', '13:15')
+        ('Laryngolog', 'Zofia Górska', '2023-10-25', '13:15'),
+        ('Kardiolog', 'Jan Kowalski', '2024-02-01', '10:30'),
+        ('Kardiolog', 'Jan Kowalski', '2024-02-03', '14:00'),
+        ('Gastrolog', 'Tomasz Kowal', '2024-02-03', '09:00'),
+        ('Neurolog', 'Anna Jabłońska', '2024-02-05', '16:00'),
+        ('Chirurg', 'Jakub Nowicki', '2024-02-06', '11:00'),
+        ('Chirurg', 'Magdalena Sienkiewicz', '2024-02-07', '15:00'),
+        ('Dermatolog', 'Anna Dąbrowska', '2024-02-08', '13:00'),
+        ('Laryngolog', 'Grzegorz Małecki', '2024-02-10', '10:15'),
+        ('Chirurg', 'Piotr Kowalewski', '2024-02-12', '12:30'),
+        ('Dermatolog', 'Katarzyna Nowicka', '2024-02-15', '14:00'),
+        ('Neurolog', 'Michał Kaczmarek', '2024-02-16', '09:30'),
+        ('Kardiolog', 'Marek Wiśniewski', '2024-02-18', '08:00')
     """)
 
     query.exec()
-
     db.close()

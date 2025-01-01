@@ -1,9 +1,10 @@
+from datetime import datetime
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
 from PyQt6.QtWidgets import QMessageBox
 import  csv
-
 import create_database
 import os
 
@@ -28,25 +29,29 @@ class MainWindow(QtWidgets.QMainWindow):
         # Frame 1
         self.frame = QtWidgets.QFrame(self.central_widget)
         self.frame.setGeometry(QtCore.QRect(-10, -20, 970, 101))
-        self.frame.setStyleSheet("QFrame{background-color:rgb(250, 247, 241);}")
         self.frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
 
-        # Label inside Frame 1
+        # Tytuł
         self.label = QtWidgets.QLabel(self.frame)
         self.label.setGeometry(QtCore.QRect(210, 30, 481, 61))
-        font = QtGui.QFont()
-        font.setFamily("Fira Code")
-        font.setPointSize(20)
-        font.setBold(True)
-        self.label.setFont(font)
+        font_label = QtGui.QFont()
+        font_label.setFamily("Fira Code")
+        font_label.setPointSize(20)
+        font_label.setBold(True)
+        self.label.setFont(font_label)
         self.label.setStyleSheet("QLabel{color:rgb(89, 170, 165);}")
         self.label.setText("Witaj w systemie \"E-PACJENT\"")
 
-        # Button inside Frame 1
-        self.pushButton = QtWidgets.QPushButton(self.frame)
-        self.pushButton.setGeometry(QtCore.QRect(830, 40, 91, 41))
-        self.pushButton.setText("Wyloguj")
+        # Przycisk Wyloguj
+        self.pushButtonWyloguj = QtWidgets.QPushButton(self.frame)
+        self.pushButtonWyloguj.setGeometry(QtCore.QRect(830, 40, 91, 41))
+        self.pushButtonWyloguj.setText("Wyloguj")
+        fontButton = QtGui.QFont()
+        fontButton.setPointSize(12)
+        fontButton.setBold(True)
+        self.pushButtonWyloguj.setFont(fontButton)
+        self.pushButtonWyloguj.clicked.connect(self.logout)
 
         # GroupBox
         self.groupBox = QtWidgets.QGroupBox("UMÓW WIZYTĘ LUB BADANIE", self.central_widget)
@@ -57,7 +62,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.groupBox.setFont(font)
         self.groupBox.setStyleSheet("QGroupBox{background-color:#DFFFE0}")
 
-        # ComboBoxes and Labels inside GroupBox
+        # Combo Boxy
         self.labelSpecjalizacja = QtWidgets.QLabel("Specjalizacja", self.groupBox)
         self.labelSpecjalizacja.setGeometry(QtCore.QRect(60, 40, 111, 16))
         font.setPointSize(11)
@@ -77,37 +82,60 @@ class MainWindow(QtWidgets.QMainWindow):
         self.comboBoxLekarz.setFont(font)
 
         self.labelGodzina = QtWidgets.QLabel("Godzina", self.groupBox)
-        self.labelGodzina.setGeometry(QtCore.QRect(550, 40, 71, 16))
+        self.labelGodzina.setGeometry(QtCore.QRect(730, 40, 71, 16))
         self.labelGodzina.setFont(font)
 
         self.labelData = QtWidgets.QLabel("Data", self.groupBox)
-        self.labelData.setGeometry(QtCore.QRect(730, 40, 49, 16))
+        self.labelData.setGeometry(QtCore.QRect(550, 40, 49, 16))
         self.labelData.setFont(font)
 
-        # ComboBox for Time instead of QTimeEdit
-        self.comboBoxGodzina = QtWidgets.QComboBox(self.groupBox)
-        self.comboBoxGodzina.setGeometry(QtCore.QRect(550, 70, 121, 31))
-        self.comboBoxGodzina.setFont(font)
-
-        # Populate ComboBox with hours and minutes in 20-minute intervals
-        for hour in range(8, 20):
-            for minute in range(0, 60, 20):
-                time_str = f"{hour:02d}:{minute:02d}"
-                self.comboBoxGodzina.addItem(time_str)
-
         self.dateEdit = QtWidgets.QDateEdit(self.groupBox)
-        self.dateEdit.setGeometry(QtCore.QRect(720, 70, 130, 31))
+        self.dateEdit.setGeometry(QtCore.QRect(545, 70, 130, 31))
         self.dateEdit.setFont(font)
         self.dateEdit.setDateTime(QtCore.QDateTime.currentDateTime())
+        self.dateEdit.setMinimumDate(QtCore.QDate.currentDate())
         self.dateEdit.setCalendarPopup(True)
 
-        # Add Appointment Button
+        self.comboBoxGodzina = QtWidgets.QComboBox(self.groupBox)
+        self.comboBoxGodzina.setGeometry(QtCore.QRect(725, 70, 121, 31))
+        self.comboBoxGodzina.setFont(font)
+
+        current_time = datetime.now()
+        selected_date = self.dateEdit.date()
+        today_date = QtCore.QDate.currentDate()
+
+    #Wybór godziny póżniejszej niż obecna
+        if selected_date == today_date:
+            hour = current_time.hour
+            minute = current_time.minute
+            for h in range(hour, 20):
+                for m in range(0, 60, 20):
+                    if h == hour and m < minute:
+                        continue
+                    time_str = f"{h:02d}:{m:02d}"
+                    self.comboBoxGodzina.addItem(time_str)
+        else:
+            for h in range(8, 20):
+                for m in range(0, 60, 20):
+                    time_str = f"{h:02d}:{m:02d}"
+                    self.comboBoxGodzina.addItem(time_str)
+
+        # Aktualizacja comboBox przy zmianie daty
+        self.dateEdit.dateChanged.connect(lambda: self.comboBoxGodzina.clear() or [
+            self.comboBoxGodzina.addItem(
+                f"{h:02d}:{m:02d}") for h in
+            (range(current_time.hour, 20) if self.dateEdit.date() == today_date else range(8, 20)) for m in
+            range(0, 60, 20) if self.dateEdit.date() != today_date or h != current_time.hour or m >= current_time.minute
+        ])
+
+
+        # Dodaj Wizyte - przycisk
         self.pushButtonDodajWizyte = QtWidgets.QPushButton("Dodaj Wizytę", self.groupBox)
         self.pushButtonDodajWizyte.setGeometry(QtCore.QRect(370, 120, 161, 51))
         self.pushButtonDodajWizyte.setFont(font)
         self.pushButtonDodajWizyte.clicked.connect(self.add_appointment)
 
-        # Frame 2 (Scheduled Appointments)
+        # Frame 2
         self.frame_2 = QtWidgets.QFrame(self.central_widget)
         self.frame_2.setGeometry(QtCore.QRect(20, 300, 901, 291))
         self.frame_2.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
@@ -119,15 +147,17 @@ class MainWindow(QtWidgets.QMainWindow):
         font.setBold(True)
         self.label_6.setFont(font)
 
+        #Tabela Wizyty
         self.tableViewWizyty = QtWidgets.QTableView(self.frame_2)
         self.tableViewWizyty.setGeometry(QtCore.QRect(10, 40, 881, 180))
 
+        #Przycisk - Odwołaj Wizytę
         self.pushButtonOdwolajWizyte = QtWidgets.QPushButton("Odwołaj Wizytę", self.frame_2)
         self.pushButtonOdwolajWizyte.setGeometry(QtCore.QRect(370, 230, 160, 51))
         self.pushButtonOdwolajWizyte.setFont(font)
         self.pushButtonOdwolajWizyte.clicked.connect(self.cancel_appointment)
 
-        # Frame 3 (Archived Appointments)
+        # Frame 3
         self.frame_3 = QtWidgets.QFrame(self.central_widget)
         self.frame_3.setGeometry(QtCore.QRect(20, 610, 901, 350))
         self.frame_3.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
@@ -141,46 +171,55 @@ class MainWindow(QtWidgets.QMainWindow):
         self.label_8.setGeometry(QtCore.QRect(20, 35, 231, 25))
         self.label_8.setFont(font)
 
+        #Tabela Archiwum
         self.tableViewArchiwum = QtWidgets.QTableView(self.frame_3)
         self.tableViewArchiwum.setGeometry(QtCore.QRect(10, 100, 881, 150))
 
+        # Przycisk Export do CSV
         self.pushButtonEksport = QtWidgets.QPushButton("Eksportuj Wizyty", self.frame_3)
         self.pushButtonEksport.setGeometry(QtCore.QRect(370, 265, 160, 51))
         self.pushButtonEksport.setFont(font)
         self.pushButtonEksport.clicked.connect(self.export_appointments)
 
+        #Combo Boxy do filtrowania
         self.filterSpecjalizacja = QtWidgets.QComboBox(self.frame_3)
-        self.filterSpecjalizacja.setGeometry(QtCore.QRect(10, 65, 191, 31))
+        self.filterSpecjalizacja.setGeometry(QtCore.QRect(20, 65, 191, 31))
         self.filterSpecjalizacja.setFont(font)
         self.filterSpecjalizacja.addItem("Specjalizacja")
         self.filterSpecjalizacja.currentIndexChanged.connect(self.apply_filter)
 
         self.filterLekarz = QtWidgets.QComboBox(self.frame_3)
-        self.filterLekarz.setGeometry(QtCore.QRect(250, 65, 191, 31))
+        self.filterLekarz.setGeometry(QtCore.QRect(240, 65, 191, 31))
         self.filterLekarz.setFont(font)
         self.filterLekarz.addItem("Lekarz")
         self.filterLekarz.currentIndexChanged.connect(self.apply_filter)
 
         self.filterData = QtWidgets.QComboBox(self.frame_3)
-        self.filterData.setGeometry(QtCore.QRect(480, 65, 191, 31))
+        self.filterData.setGeometry(QtCore.QRect(460, 65, 191, 31))
         self.filterData.setFont(font)
         self.filterData.addItem("Data")
         self.filterData.currentIndexChanged.connect(self.apply_filter)
 
-
-        # Set up menu and status bar
         self.menubar = self.menuBar()
         self.statusbar = self.statusBar()
 
         self.setWindowTitle("E-PACJENT")
         self.setFixedSize(950, 950)
+        self.setWindowIcon(QIcon("medi.png"))
 
         self.load_specializations()
         self.load_appointments()
         self.load_archives()
+        self.archive_past_appointments()
+
+        #timer do aktualizacji wizyt
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self.archive_past_appointments)
+        self.timer.start(20*30*1000)
 
         self.show()
 
+    #Wczytanie specjalizacji do combobox
     def load_specializations(self):
         query = QSqlQuery()
         if query.exec("SELECT DISTINCT specjalizacja FROM lekarze"):
@@ -188,6 +227,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.comboBoxSpecjalizacja.addItem(query.value(0))
         self.comboBoxSpecjalizacja.currentIndexChanged.connect(self.load_doctors)
 
+    #Załadowanie lekarzy do combobox
     def load_doctors(self):
         selected_specialization = self.comboBoxSpecjalizacja.currentText()
         query = QSqlQuery()
@@ -198,6 +238,7 @@ class MainWindow(QtWidgets.QMainWindow):
             while query.next():
                 self.comboBoxLekarz.addItem(query.value(0))
 
+    #Dodanie wizyty
     def add_appointment(self):
         specialization = self.comboBoxSpecjalizacja.currentText()
         doctor = self.comboBoxLekarz.currentText()
@@ -205,13 +246,34 @@ class MainWindow(QtWidgets.QMainWindow):
         date = self.dateEdit.date().toString("yyyy-MM-dd")
 
         if not specialization or not doctor or not time or not date:
-            print("Proszę wypełnić wszystkie pola")
+            msgbox = QMessageBox(self)
+            msgbox.setWindowTitle("Uwaga")
+            msgbox.setText("Proszę uzupełnić wszystkie pola.")
+            msgbox.setIcon(QMessageBox.Icon.Information)
+            msgbox.setStandardButtons(QMessageBox.StandardButton.Ok)
+            msgbox.exec()
             return
 
+        #Pomięcie weekendów oraz świąt
         day_of_week = self.dateEdit.date().dayOfWeek()
-        print(f"Wybrany dzień tygodnia: {day_of_week}")
+        date_of_visit = self.dateEdit.date().toString("MM-dd")
+        holidays = [
+            "01-01",
+            "01-06",
+            "04-20",
+            "04-21",
+            "05-01",
+            "05-03",
+            "06-08",
+            "06-19",
+            "08-15",
+            "11-01",
+            "11-11",
+            "12-25",
+            "12-26"
+        ]
 
-        if day_of_week in [6, 7]:  # Sobota lub niedziela
+        if day_of_week in [6, 7] or date_of_visit in holidays:  # Sobota lub niedziela
             msg = QMessageBox(self)
             msg.setWindowTitle("Ostrzeżenie")
             msg.setText("Nie można umówić wizyty w weekend (sobota/niedziela) oraz w dni świąteczne.")
@@ -220,17 +282,24 @@ class MainWindow(QtWidgets.QMainWindow):
             msg.exec()
             return
 
+        #Sprawdzenie czy o tej godzinie nie ma już wizyty
         query = QSqlQuery()
         query.prepare(
-            "SELECT COUNT(*) FROM wizyty WHERE lekarz = :lekarz AND data = :data AND godzina = :godzina"
+            "SELECT COUNT(*) FROM wizyty WHERE data = :data AND godzina = :godzina"
         )
         query.bindValue(":lekarz", doctor)
         query.bindValue(":data", date)
         query.bindValue(":godzina", time)
         if query.exec() and query.next() and query.value(0) > 0:
-            print("W tym czasie ta wizyta już istnieje.")
+            msgbox = QMessageBox(self)
+            msgbox.setWindowTitle("Uwaga")
+            msgbox.setText("O tej godzinie masz juz zarezerwowaną wizytę.")
+            msgbox.setIcon(QMessageBox.Icon.Information)
+            msgbox.setStandardButtons(QMessageBox.StandardButton.Ok)
+            msgbox.exec()
             return
 
+        #Daodanie wizyty do tabeli
         query.prepare(
             "INSERT INTO wizyty (specjalizacja, lekarz, godzina, data) VALUES (:specjalizacja, :lekarz, :godzina, :data)"
         )
@@ -244,6 +313,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Błąd podczas dodawania wizyty")
         self.load_appointments()
 
+    #Odwołanie wizyty
     def cancel_appointment(self):
         selected_row = self.tableViewWizyty.selectionModel().currentIndex().row()
 
@@ -269,10 +339,12 @@ class MainWindow(QtWidgets.QMainWindow):
         msg_box.setText(
             f"Czy na pewno chcesz odwołać wizytę?\n\nSpecjalizacja: {specialization}\nLekarz: {doctor}\nData: {date}\nGodzina: {time}")
         msg_box.setIcon(QMessageBox.Icon.Question)
-        msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+
+        ok_button = msg_box.addButton("Tak", QMessageBox.ButtonRole.AcceptRole)
+        cancel_button = msg_box.addButton("Nie", QMessageBox.ButtonRole.RejectRole)
         result = msg_box.exec()
 
-        if result == QMessageBox.StandardButton.No:
+        if msg_box.clickedButton() == cancel_button:
             return
 
         # Usunięcie wizyty z bazy danych
@@ -290,9 +362,9 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             print("Błąd podczas odwoływania wizyty.")
 
-        # Odświeżenie tabeli z wizytami
         self.load_appointments()
 
+    #Wyświetalnie danych z tabeli wizyty
     def load_appointments(self):
         model = QSqlTableModel()
         model.setTable("wizyty")
@@ -333,6 +405,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tableViewWizyty.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)  # Zablokowanie edycji
         self.tableViewWizyty.setSortingEnabled(True)  # Sortowanie po kliknięciu w nagłówek kolumny
 
+    #Załadowanie wizyt archiwalnych
     def load_archives(self):
         model = QSqlTableModel()
         model.setTable("archiwum")
@@ -385,22 +458,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tableViewArchiwum.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)  # Zablokowanie edycji
         self.tableViewArchiwum.setSortingEnabled(True)  # Sortowanie po kliknięciu w nagłówek kolumny
 
+    #Export wizyt archiwalnych do pliku
     def export_appointments(self):
         model = self.tableViewArchiwum.model()
         if model is None or model.rowCount() == 0:
             QMessageBox.warning(self, "Błąd", "Brak danych do eksportu.")
             return
 
-        # options = QtWidgets.QFileDialog.Options()
-        # file_path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Zapisz plik", "", "CSV Files (*.csv)",
-        #                                                      options=options)
-        #
-        # if not file_path:
-        #     return
         app_directory = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(app_directory, "archiwum_wizyt.csv")
-
-
 
         try:
             with open(file_path, mode="w", newline="", encoding="utf-8") as file:
@@ -417,31 +483,87 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Błąd", f"Wystąpił błąd podczas eksportu: {str(e)}")
 
+    #Filtrowanie tabeli
     def apply_filter(self):
         model = self.tableViewArchiwum.model()
-
         filter_query = []
 
-        # Filtrowanie po specjalizacji
         if self.filterSpecjalizacja.currentText() != "Specjalizacja":
             filter_query.append(f"specjalizacja = '{self.filterSpecjalizacja.currentText()}'")
 
-        if self.filterSpecjalizacja.currentText() != "Lekarz":
+        if self.filterLekarz.currentText() != "Lekarz":
             filter_query.append(f"lekarz = '{self.filterLekarz.currentText()}'")
 
         if self.filterData.currentText() != "Data":
             filter_query.append(f"data = '{self.filterData.currentText()}'")
 
-        # Jeśli istnieją filtry, ustaw je w zapytaniu
         if filter_query:
             model.setFilter(" AND ".join(filter_query))
         else:
-            model.setFilter("")  # Jeśli brak filtrów, pokaż wszystkie dane
+            model.setFilter("")
 
-        model.select()  # Zastosuj filtr na model
+        model.select()
 
+    #wylogowanie
+    def logout(self):
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Potwierdzenie wylogowania")
+        msg_box.setText("Czy na pewno chcesz się wylogować?")
+        msg_box.setIcon(QMessageBox.Icon.Question)
+        ok_button = msg_box.addButton("Tak", QMessageBox.ButtonRole.AcceptRole)
+        cancel_button = msg_box.addButton("Nie", QMessageBox.ButtonRole.RejectRole)
 
-# Run the application
-app = QtWidgets.QApplication([])
-window = MainWindow()
-app.exec()
+        result = msg_box.exec()
+
+        if msg_box.clickedButton() == ok_button:
+            print("Użytkownik został wylogowany.")
+            self.close()
+        else:
+            print("Anulowano wylogowanie.")
+
+    def archive_past_appointments(self):
+        current_datetime = datetime.now()
+        current_date = current_datetime.strftime("%Y-%m-%d")
+        current_time = current_datetime.strftime("%H:%M")
+
+        query = QSqlQuery()
+        query.prepare("""
+            SELECT * FROM wizyty
+            WHERE data < :current_date
+            OR (data = :current_date AND godzina < :current_time)
+        """)
+        query.bindValue(":current_date", current_date)
+        query.bindValue(":current_time", current_time)
+
+        if query.exec():
+            while query.next():
+                id_wizyty = query.value(0)
+                specjalizacja = query.value(1)
+                lekarz = query.value(2)
+                data = query.value(3)
+                godzina = query.value(4)
+
+                archive_query = QSqlQuery()
+                archive_query.prepare("""
+                    INSERT INTO archiwum (specjalizacja, lekarz, data, godzina)
+                    VALUES (:specjalizacja, :lekarz, :data, :godzina)
+                """)
+                archive_query.bindValue(":specjalizacja", specjalizacja)
+                archive_query.bindValue(":lekarz", lekarz)
+                archive_query.bindValue(":data", data)
+                archive_query.bindValue(":godzina", godzina)
+
+                if not archive_query.exec():
+                    print("Błąd podczas przenoszenia wizyty do archiwum.")
+
+                # Usuń z tabeli wizyty
+                delete_query = QSqlQuery()
+                delete_query.prepare("DELETE FROM wizyty WHERE id = :id")
+                delete_query.bindValue(":id", id_wizyty)
+
+                if not delete_query.exec():
+                    print("Błąd podczas usuwania wizyty z głównej tabeli.")
+
+        self.load_appointments()
+        self.load_archives()
+

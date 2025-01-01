@@ -1,8 +1,9 @@
 import sys
+from PyQt6 import QtCore, QtGui
 from PyQt6.QtWidgets import (
-    QApplication, QDialog, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QGraphicsView
+    QApplication, QDialog, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QMessageBox
 )
-from PyQt6.QtGui import QPixmap, QIcon
+from PyQt6.QtGui import QPixmap, QIcon, QFont
 from PyQt6.QtCore import Qt
 
 
@@ -12,9 +13,7 @@ class LoginWindow(QDialog):
 
         self.setWindowTitle("E-Pacjent - Ekran Logowania")
         self.setFixedSize(500, 360)
-
-        # Ustawienia ikony
-        self.setWindowIcon(QIcon("logo.png"))  # Wymień na ścieżkę do swojej ikony
+        self.setWindowIcon(QIcon("medi.png"))
 
         # Nagłówek
         self.header_label = QLabel('LOGOWANIE DO SYSTEMU "E-PACJENT"')
@@ -29,20 +28,38 @@ class LoginWindow(QDialog):
         self.header_label.setFixedHeight(50)
 
         # Etykiety i pola tekstowe
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        font.setBold(True)
         self.id_label = QLabel("ID Pacjenta")
+        self.id_label.setFont(font)
         self.id_input = QLineEdit()
 
         self.password_label = QLabel("Hasło dostępu")
         self.password_input = QLineEdit()
+        self.password_label.setFont(font)
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
 
         # Przycisk logowania
         self.login_button = QPushButton("Zaloguj")
+        self.login_button.setFixedSize(141, 41)
         self.login_button.setStyleSheet("""
-            background-color: rgb(230, 230, 230);
-            border: 1px solid rgb(200, 200, 200);
-            padding: 5px;
+            QPushButton {
+                background-color: #e1eae8;
+                border: 1px solid rgb(200, 200, 200);
+                font-size: 15px;
+                font: bold;
+                padding: 5px;
+                border-radius: 5px; /* Zaokrąglenie przycisku */
+            }
+            QPushButton:hover {
+                background-color: #c8d6d4; /* Zmiana koloru na jaśniejszy po najechaniu */
+            }
+            QPushButton:pressed {
+                background-color: #a5b5b4; /* Ciemniejszy kolor po kliknięciu */
+            }
         """)
+
         self.login_button.clicked.connect(self.handle_login)
 
         # Obrazek
@@ -80,17 +97,14 @@ class LoginWindow(QDialog):
         id_pacjenta = self.id_input.text()
         haslo = self.password_input.text()
 
-        if id_pacjenta == "admin" and haslo == "1234":  # Przykładowa walidacja
+        if id_pacjenta == "pacjent" and haslo == "pacjent":
             print("Zalogowano pomyślnie!")
             self.accept()
         else:
+            msgbox = QMessageBox(self)
+            msgbox.setWindowTitle("Uwaga")
+            msgbox.setText("Błędny login lub hasło!")
+            msgbox.setIcon(QMessageBox.Icon.Warning)
+            msgbox.setStandardButtons(QMessageBox.StandardButton.Ok)
+            msgbox.exec()
             print("Błędny login lub hasło!")
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-
-    window = LoginWindow()
-    window.show()
-
-    sys.exit(app.exec())
