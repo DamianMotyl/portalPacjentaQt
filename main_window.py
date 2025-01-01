@@ -221,10 +221,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #Wczytanie specjalizacji do combobox
     def load_specializations(self):
+        self.comboBoxSpecjalizacja.addItem("")
         query = QSqlQuery()
         if query.exec("SELECT DISTINCT specjalizacja FROM lekarze"):
             while query.next():
                 self.comboBoxSpecjalizacja.addItem(query.value(0))
+
         self.comboBoxSpecjalizacja.currentIndexChanged.connect(self.load_doctors)
 
     #Załadowanie lekarzy do combobox
