@@ -9,16 +9,16 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyleSheet("""
         QPushButton {
-            background-color: #e1eae8; /* Niebieskie przyciski */
+            background-color: #e1eae8; 
             border: 1px solid #89aaa5;
             border-radius: 5px;
             padding: 5px 10px;
         }
         QPushButton:hover {
-            background-color: #f0f4f4; /* Jaśniejszy niebieski po najechaniu */
+            background-color: #f0f4f4; 
         }
         QPushButton:pressed {
-            background-color: #1F618D; /* Ciemniejszy niebieski po kliknięciu */
+            background-color: #1F618D;
             }
     """)
 

@@ -568,4 +568,3 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.load_appointments()
         self.load_archives()
-

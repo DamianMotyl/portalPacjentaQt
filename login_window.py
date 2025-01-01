@@ -89,7 +89,6 @@ class LoginWindow(QDialog):
         layout.addWidget(self.header_label)
         layout.addLayout(main_layout)
         layout.addWidget(self.login_button, alignment=Qt.AlignmentFlag.AlignCenter)
-
         self.setLayout(layout)
 
     def handle_login(self):

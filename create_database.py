@@ -98,6 +98,5 @@ def add_sample_doctors_and_archives():
         ('Neurolog', 'Michał Kaczmarek', '2024-02-16', '09:30'),
         ('Kardiolog', 'Marek Wiśniewski', '2024-02-18', '08:00')
     """)
-
     query.exec()
     db.close()
