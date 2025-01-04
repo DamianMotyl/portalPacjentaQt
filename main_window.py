@@ -30,16 +30,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Frame 1
         self.frame = QtWidgets.QFrame(self.central_widget)
-        self.frame.setGeometry(QtCore.QRect(-10, -20, 970, 101))
+        self.frame.setGeometry(QtCore.QRect(0,0, 970, 50))
         self.frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
 
         # Tytuł
         self.label = QtWidgets.QLabel(self.frame)
-        self.label.setGeometry(QtCore.QRect(210, 30, 481, 61))
+        self.label.setGeometry(QtCore.QRect(290, 8, 481, 40))
         font_label = QtGui.QFont()
         font_label.setFamily("Fira Code")
-        font_label.setPointSize(20)
+        font_label.setPointSize(16)
         font_label.setBold(True)
         self.label.setFont(font_label)
         self.label.setStyleSheet("QLabel{color:rgb(89, 170, 165);}")
@@ -47,7 +47,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Przycisk Wyloguj
         self.pushButtonWyloguj = QtWidgets.QPushButton(self.frame)
-        self.pushButtonWyloguj.setGeometry(QtCore.QRect(830, 40, 91, 41))
+        self.pushButtonWyloguj.setGeometry(QtCore.QRect(830, 6, 91, 41))
         self.pushButtonWyloguj.setText("Wyloguj")
         fontButton = QtGui.QFont()
         fontButton.setPointSize(12)
@@ -57,49 +57,49 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # GroupBox
         self.groupBox = QtWidgets.QGroupBox("UMÓW WIZYTĘ LUB BADANIE", self.central_widget)
-        self.groupBox.setGeometry(QtCore.QRect(20, 90, 901, 191))
+        self.groupBox.setGeometry(QtCore.QRect(20, 55, 901, 141))
         font = QtGui.QFont()
-        font.setPointSize(12)
+        font.setPointSize(10)
         font.setBold(True)
         self.groupBox.setFont(font)
         self.groupBox.setStyleSheet("QGroupBox{background-color:#DFFFE0}")
 
         # Combo Boxy
         self.labelSpecjalizacja = QtWidgets.QLabel("Specjalizacja", self.groupBox)
-        self.labelSpecjalizacja.setGeometry(QtCore.QRect(60, 40, 111, 16))
-        font.setPointSize(11)
+        self.labelSpecjalizacja.setGeometry(QtCore.QRect(60, 30, 111, 16))
+        font.setPointSize(10)
         font.setBold(True)
         self.labelSpecjalizacja.setFont(font)
 
         self.labelLekarz = QtWidgets.QLabel("Lekarz", self.groupBox)
-        self.labelLekarz.setGeometry(QtCore.QRect(300, 40, 49, 16))
+        self.labelLekarz.setGeometry(QtCore.QRect(300, 30, 49, 16))
         self.labelLekarz.setFont(font)
 
         self.comboBoxSpecjalizacja = QtWidgets.QComboBox(self.groupBox)
-        self.comboBoxSpecjalizacja.setGeometry(QtCore.QRect(60, 70, 191, 31))
+        self.comboBoxSpecjalizacja.setGeometry(QtCore.QRect(60, 50, 191, 31))
         self.comboBoxSpecjalizacja.setFont(font)
 
         self.comboBoxLekarz = QtWidgets.QComboBox(self.groupBox)
-        self.comboBoxLekarz.setGeometry(QtCore.QRect(300, 70, 191, 31))
+        self.comboBoxLekarz.setGeometry(QtCore.QRect(300, 50, 191, 31))
         self.comboBoxLekarz.setFont(font)
 
         self.labelGodzina = QtWidgets.QLabel("Godzina", self.groupBox)
-        self.labelGodzina.setGeometry(QtCore.QRect(730, 40, 71, 16))
+        self.labelGodzina.setGeometry(QtCore.QRect(730, 30, 71, 16))
         self.labelGodzina.setFont(font)
 
         self.labelData = QtWidgets.QLabel("Data", self.groupBox)
-        self.labelData.setGeometry(QtCore.QRect(550, 40, 49, 16))
+        self.labelData.setGeometry(QtCore.QRect(550, 30, 49, 16))
         self.labelData.setFont(font)
 
         self.dateEdit = QtWidgets.QDateEdit(self.groupBox)
-        self.dateEdit.setGeometry(QtCore.QRect(545, 70, 130, 31))
+        self.dateEdit.setGeometry(QtCore.QRect(545, 50, 130, 31))
         self.dateEdit.setFont(font)
         self.dateEdit.setDateTime(QtCore.QDateTime.currentDateTime())
         self.dateEdit.setMinimumDate(QtCore.QDate.currentDate())
         self.dateEdit.setCalendarPopup(True)
 
         self.comboBoxGodzina = QtWidgets.QComboBox(self.groupBox)
-        self.comboBoxGodzina.setGeometry(QtCore.QRect(725, 70, 121, 31))
+        self.comboBoxGodzina.setGeometry(QtCore.QRect(725, 50, 121, 31))
         self.comboBoxGodzina.setFont(font)
 
         current_time = datetime.now()
@@ -133,35 +133,35 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Dodaj Wizyte - przycisk
         self.pushButtonDodajWizyte = QtWidgets.QPushButton("Dodaj Wizytę", self.groupBox)
-        self.pushButtonDodajWizyte.setGeometry(QtCore.QRect(370, 120, 161, 51))
+        self.pushButtonDodajWizyte.setGeometry(QtCore.QRect(370, 90, 161, 41))
         self.pushButtonDodajWizyte.setFont(font)
         self.pushButtonDodajWizyte.clicked.connect(self.add_appointment)
 
         # Frame 2
         self.frame_2 = QtWidgets.QFrame(self.central_widget)
-        self.frame_2.setGeometry(QtCore.QRect(20, 300, 901, 291))
+        self.frame_2.setGeometry(QtCore.QRect(20, 200, 901, 240))
         self.frame_2.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
 
         self.label_6 = QtWidgets.QLabel("TWOJE ZAPLANOWANE WIZYTY", self.frame_2)
         self.label_6.setGeometry(QtCore.QRect(20, 10, 251, 16))
-        font.setPointSize(12)
+        font.setPointSize(10)
         font.setBold(True)
         self.label_6.setFont(font)
 
         #Tabela Wizyty
         self.tableViewWizyty = QtWidgets.QTableView(self.frame_2)
-        self.tableViewWizyty.setGeometry(QtCore.QRect(10, 40, 881, 180))
+        self.tableViewWizyty.setGeometry(QtCore.QRect(10, 35, 881, 150))
 
         #Przycisk - Odwołaj Wizytę
         self.pushButtonOdwolajWizyte = QtWidgets.QPushButton("Odwołaj Wizytę", self.frame_2)
-        self.pushButtonOdwolajWizyte.setGeometry(QtCore.QRect(370, 230, 160, 51))
+        self.pushButtonOdwolajWizyte.setGeometry(QtCore.QRect(370, 190, 150, 41))
         self.pushButtonOdwolajWizyte.setFont(font)
         self.pushButtonOdwolajWizyte.clicked.connect(self.cancel_appointment)
 
         # Frame 3
         self.frame_3 = QtWidgets.QFrame(self.central_widget)
-        self.frame_3.setGeometry(QtCore.QRect(20, 610, 901, 330))
+        self.frame_3.setGeometry(QtCore.QRect(20, 445, 901, 240))
         self.frame_3.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.frame_3.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
 
@@ -175,29 +175,29 @@ class MainWindow(QtWidgets.QMainWindow):
 
         #Tabela Archiwum
         self.tableViewArchiwum = QtWidgets.QTableView(self.frame_3)
-        self.tableViewArchiwum.setGeometry(QtCore.QRect(10, 100, 881, 155))
+        self.tableViewArchiwum.setGeometry(QtCore.QRect(10, 70, 881, 150))
 
         # Przycisk Export do CSV
-        self.pushButtonEksport = QtWidgets.QPushButton("Eksportuj Wizyty", self.frame_3)
-        self.pushButtonEksport.setGeometry(QtCore.QRect(370, 265, 160, 51))
+        self.pushButtonEksport = QtWidgets.QPushButton("Eksportuj", self.frame_3)
+        self.pushButtonEksport.setGeometry(QtCore.QRect(795, 15, 91, 41))
         self.pushButtonEksport.setFont(font)
         self.pushButtonEksport.clicked.connect(self.export_appointments)
 
         #Combo Boxy do filtrowania
         self.filterSpecjalizacja = QtWidgets.QComboBox(self.frame_3)
-        self.filterSpecjalizacja.setGeometry(QtCore.QRect(20, 65, 191, 31))
+        self.filterSpecjalizacja.setGeometry(QtCore.QRect(120, 32, 191, 31))
         self.filterSpecjalizacja.setFont(font)
         self.filterSpecjalizacja.addItem("Specjalizacja")
         self.filterSpecjalizacja.currentIndexChanged.connect(self.apply_filter)
 
         self.filterLekarz = QtWidgets.QComboBox(self.frame_3)
-        self.filterLekarz.setGeometry(QtCore.QRect(240, 65, 191, 31))
+        self.filterLekarz.setGeometry(QtCore.QRect(330, 32, 191, 31))
         self.filterLekarz.setFont(font)
         self.filterLekarz.addItem("Lekarz")
         self.filterLekarz.currentIndexChanged.connect(self.apply_filter)
 
         self.filterData = QtWidgets.QComboBox(self.frame_3)
-        self.filterData.setGeometry(QtCore.QRect(460, 65, 191, 31))
+        self.filterData.setGeometry(QtCore.QRect(540, 32, 191, 31))
         self.filterData.setFont(font)
         self.filterData.addItem("Data")
         self.filterData.currentIndexChanged.connect(self.apply_filter)
@@ -221,7 +221,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.archive_past_appointments)
         self.timer.start(20*30*1000)
-        self.resize(950,950)
+        self.setFixedSize(945,710)
+
+        #self.resize(945,710)
 
         self.show()
 
@@ -392,7 +394,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tableViewWizyty.setStyleSheet(
             """
             QTableView {
-                font-size: 10pt;
+                font-size: 9pt;
                 background-color: #f9f9f9;
                 alternate-background-color: #e6f4f1;
                 gridline-color: #c3c3c3;
@@ -401,7 +403,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 background-color: #89aaa5;
                 color: white;
                 font-weight: bold;
-                font-size: 11pt;
+                font-size: 10pt;
                 border: 1px solid #d4d4d4;
                 padding: 4px;
             }
@@ -445,7 +447,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tableViewArchiwum.setStyleSheet(
             """
             QTableView {
-                font-size: 10pt;
+                font-size: 9pt;
                 background-color: #f9f9f9;
                 alternate-background-color: #e6f4f1;
                 gridline-color: #c3c3c3;
@@ -454,7 +456,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 background-color: #89aaa5;
                 color: white;
                 font-weight: bold;
-                font-size: 11pt;
+                font-size: 10pt;
                 border: 1px solid #d4d4d4;
                 padding: 4px;
             }
@@ -605,9 +607,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.load_appointments()
         self.load_archives()
 
-if __name__ == "__main__":
-    import sys
-    app = QApplication(sys.argv)
-    main_window = MainWindow()
-    main_window.show()
-    sys.exit(app.exec())
+# if __name__ == "__main__":
+#     import sys
+#     app = QApplication(sys.argv)
+#     main_window = MainWindow()
+#     main_window.show()
+#     sys.exit(app.exec())
