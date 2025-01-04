@@ -3,7 +3,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
-from PyQt6.QtWidgets import QMessageBox, QScrollArea
+from PyQt6.QtWidgets import QMessageBox, QScrollArea, QApplication
 import  csv
 import create_database
 import os
@@ -22,13 +22,11 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Nie udało się połączyć z bazą danych")
             return
 
+
         # Central Widget
         self.central_widget = QtWidgets.QWidget(self)
         self.setCentralWidget(self.central_widget)
 
-        self.scroll_area = QScrollArea(self)
-        self.scroll_area.setWidget(self.central_widget)
-        self.setCentralWidget(self.scroll_area)
 
         # Frame 1
         self.frame = QtWidgets.QFrame(self.central_widget)
@@ -163,7 +161,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Frame 3
         self.frame_3 = QtWidgets.QFrame(self.central_widget)
-        self.frame_3.setGeometry(QtCore.QRect(20, 610, 901, 350))
+        self.frame_3.setGeometry(QtCore.QRect(20, 610, 901, 330))
         self.frame_3.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.frame_3.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
 
@@ -177,7 +175,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         #Tabela Archiwum
         self.tableViewArchiwum = QtWidgets.QTableView(self.frame_3)
-        self.tableViewArchiwum.setGeometry(QtCore.QRect(10, 100, 881, 150))
+        self.tableViewArchiwum.setGeometry(QtCore.QRect(10, 100, 881, 155))
 
         # Przycisk Export do CSV
         self.pushButtonEksport = QtWidgets.QPushButton("Eksportuj Wizyty", self.frame_3)
@@ -208,18 +206,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.statusbar = self.statusBar()
 
         self.setWindowTitle("E-PACJENT")
-        self.setFixedSize(950, 950)
+
+       # self.setFixedSize(950, 950)
         self.setWindowIcon(QIcon("medi.png"))
 
         self.load_specializations()
         self.load_appointments()
         self.load_archives()
         self.archive_past_appointments()
+        self.load_filter_specializations()
+        self.load_filter_doctors()
 
         #timer do aktualizacji wizyt
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.archive_past_appointments)
         self.timer.start(20*30*1000)
+        self.resize(950,950)
 
         self.show()
 
@@ -494,21 +496,51 @@ class MainWindow(QtWidgets.QMainWindow):
         model = self.tableViewArchiwum.model()
         filter_query = []
 
+        # Filtrowanie po specjalizacji
         if self.filterSpecjalizacja.currentText() != "Specjalizacja":
-            filter_query.append(f"specjalizacja = '{self.filterSpecjalizacja.currentText()}'")
+            selected_specjalizacja = self.filterSpecjalizacja.currentText()
+            filter_query.append(f"specjalizacja = '{selected_specjalizacja}'")
 
+            # Aktualizacja listy lekarzy dla wybranej specjalizacji
+            query = QSqlQuery()
+            query.exec(f"SELECT DISTINCT lekarz FROM wizyty WHERE specjalizacja = '{selected_specjalizacja}'")
+
+            self.filterLekarz.addItem("Lekarz")
+            while query.next():
+                self.filterLekarz.addItem(query.value(0))
+
+        # Filtrowanie po lekarzu
         if self.filterLekarz.currentText() != "Lekarz":
             filter_query.append(f"lekarz = '{self.filterLekarz.currentText()}'")
 
+        # Filtrowanie po dacie
         if self.filterData.currentText() != "Data":
             filter_query.append(f"data = '{self.filterData.currentText()}'")
 
+        # Ustawienie filtra w modelu
         if filter_query:
             model.setFilter(" AND ".join(filter_query))
         else:
             model.setFilter("")
 
         model.select()
+    #
+    def load_filter_specializations(self):
+        query = QSqlQuery()
+        query.exec("SELECT DISTINCT specjalizacja FROM archiwum")
+        self.filterSpecjalizacja.clear()
+        self.filterSpecjalizacja.addItem("Specjalizacja")
+        while query.next():
+            self.filterSpecjalizacja.addItem(query.value(0))
+        self.filterSpecjalizacja.currentIndexChanged.connect(self.apply_filter)
+
+    def load_filter_doctors(self):
+        query=QSqlQuery()
+        query.exec("SELECT DISTINCT doctor FROM archiwum")
+        self.filterLekarz.addItem("Lekarz")
+        while query.next():
+            self.filterLekarz.addItem(query.value(0))
+        self.filterLekarz.currentIndexChanged.connect(self.apply_filter)
 
     #wylogowanie
     def logout(self):
@@ -572,3 +604,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.load_appointments()
         self.load_archives()
+
+if __name__ == "__main__":
+    import sys
+    app = QApplication(sys.argv)
+    main_window = MainWindow()
+    main_window.show()
+    sys.exit(app.exec())
