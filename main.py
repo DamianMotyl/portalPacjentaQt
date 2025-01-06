@@ -1,6 +1,6 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QMessageBox, QPushButton
-from PyQt6.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog, QMessageBox, QPushButton
+from PyQt5.QtGui import QIcon
 from login_window import LoginWindow  # Importujemy wygenerowaną klasę z pliku
 from main_window import MainWindow
 
@@ -19,11 +19,13 @@ if __name__ == "__main__":
         }
         QPushButton:pressed {
             background-color: #1F618D;
-            }
+        }
+        QMessageBox {
+        background-color: #F0F0F0;}
     """)
 
     login_dialog = LoginWindow()
-    if login_dialog.exec() == QDialog.DialogCode.Accepted:
+    if login_dialog.exec_() == QDialog.Accepted:
         main_window = MainWindow()
         main_window.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec_())

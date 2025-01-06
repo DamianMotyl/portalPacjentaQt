@@ -1,4 +1,5 @@
-from PyQt6.QtSql import QSqlDatabase, QSqlQuery
+import sys
+from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 
 def create_db():
     db = QSqlDatabase.addDatabase("QSQLITE")
@@ -43,7 +44,6 @@ def create_db():
 
     db.close()
     add_sample_doctors_and_archives()
-
 
 def add_sample_doctors_and_archives():
     db = QSqlDatabase.addDatabase("QSQLITE")

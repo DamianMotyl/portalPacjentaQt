@@ -4,9 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ba1f14a3-9afe-49ca-9da1-97901d3bdf59" name="Changes" comment="bez scrolla">
+    <list default="true" id="ba1f14a3-9afe-49ca-9da1-97901d3bdf59" name="Changes" comment="wersja 1.1">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/portalPacjenta.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/portalPacjenta.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/create_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/create_database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/login_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/login_window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/przychodnia.db" beforeDir="false" afterPath="$PROJECT_DIR$/przychodnia.db" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,6 +71,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "interfejs",
+    "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "E:/Programowanie/Python/portalPacjenta",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -109,7 +116,16 @@
       <workItem from="1735754831639" duration="8579000" />
       <workItem from="1735766161518" duration="1148000" />
       <workItem from="1735855352354" duration="1980000" />
-      <workItem from="1735993820081" duration="3884000" />
+      <workItem from="1735993820081" duration="3932000" />
+      <workItem from="1736000907623" duration="43000" />
+      <workItem from="1736007445513" duration="2344000" />
+      <workItem from="1736009811550" duration="406000" />
+      <workItem from="1736010240248" duration="5000" />
+      <workItem from="1736173251660" duration="68000" />
+      <workItem from="1736173348167" duration="67000" />
+      <workItem from="1736173458903" duration="202000" />
+      <workItem from="1736173668182" duration="534000" />
+      <workItem from="1736181954227" duration="126000" />
     </task>
     <task id="LOCAL-00001" summary="szkielet programu">
       <option name="closed" value="true" />
@@ -175,7 +191,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735994263320</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="wersja 1.1">
+      <option name="closed" value="true" />
+      <created>1735997744200</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1735997744200</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -199,14 +223,15 @@
     <MESSAGE value="prawie gotowe" />
     <MESSAGE value="wersja 1.0" />
     <MESSAGE value="bez scrolla" />
-    <option name="LAST_COMMIT_MESSAGE" value="bez scrolla" />
+    <MESSAGE value="wersja 1.1" />
+    <option name="LAST_COMMIT_MESSAGE" value="wersja 1.1" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/portalPacjenta$loginWindow.coverage" NAME="loginWindow Coverage Results" MODIFIED="1735331706211" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/portalPacjenta$create_database.coverage" NAME="create_database Coverage Results" MODIFIED="1735670237467" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/portalPacjenta$main_window.coverage" NAME="main_window Coverage Results" MODIFIED="1735997599047" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/portalPacjenta$main.coverage" NAME="main Coverage Results" MODIFIED="1735997639341" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/portalPacjenta$login_window.coverage" NAME="login_window Coverage Results" MODIFIED="1735763565515" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/portalPacjenta$main_window.coverage" NAME="main_window Coverage Results" MODIFIED="1736009941451" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/portalPacjenta$main.coverage" NAME="main Coverage Results" MODIFIED="1736181970637" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/portalPacjenta$login_window.coverage" NAME="login_window Coverage Results" MODIFIED="1736009701317" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/portalPacjenta$create_db.coverage" NAME="create_db Coverage Results" MODIFIED="1735501039564" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
